@@ -611,42 +611,25 @@ class OperBitBase11SB(OperBitIndAbs):
 
 
 class OperMultiReg(Operand):
-    def __init__(self, is_popm):
-        self.is_popm = is_popm
+    def __init__(self, reversed):
+        self.reversed = reversed
 
     def length(self):
         return 1
 
     def decode(self, opcode, decoder, addr):
-        reg_mask = decoder.unsigned_byte()
-
-        if self.is_popm:
-            reversed_mask = 0
-            for i in range(0, 8):
-                if reg_mask & (1 << i) != 0:
-                    reversed_mask |= 1 << (7 - i)
-
-            reg_mask = reversed_mask
-
-        self.reg_mask = reg_mask
+        self.reg_mask = decoder.unsigned_byte()
 
     def encode(self, opcode, encoder, addr):
-        reg_mask = self.reg_mask
-
-        if self.is_popm:
-            reversed_mask = 0
-            for i in range(0, 8):
-                if reg_mask & (1 << i) != 0:
-                    reversed_mask |= 1 << (7 - i)
-
-            reg_mask = reversed_mask
-
-        encoder.unsigned_byte(reg_mask)
+        encoder.unsigned_byte(self.reg_mask)
         return opcode
 
     def render(self, addr):
+        register_list = ['FB', 'SB', 'A1', 'A0', 'R3', 'R2', 'R1', 'R0']
+        if self.reversed:
+            register_list = reversed(register_list)
         tokens = []
-        for index, reg in enumerate(['FB', 'SB', 'A1', 'A0', 'R3', 'R2', 'R1', 'R0']):
+        for index, reg in enumerate(register_list):
             if self.reg_mask & (1 << index):
                 if tokens:
                     tokens += asm(('opsep', ', '))
