@@ -611,14 +611,37 @@ class OperBitBase11SB(OperBitIndAbs):
 
 
 class OperMultiReg(Operand):
+    def __init__(self, is_popm):
+        self.is_popm = is_popm
+
     def length(self):
         return 1
 
     def decode(self, opcode, decoder, addr):
-        self.reg_mask = decoder.unsigned_byte()
+        reg_mask = decoder.unsigned_byte()
+
+        if self.is_popm:
+            reversed_mask = 0
+            for i in range(0, 8):
+                if reg_mask & (1 << i) != 0:
+                    reversed_mask |= 1 << (7 - i)
+
+            reg_mask = reversed_mask
+
+        self.reg_mask = reg_mask
 
     def encode(self, opcode, encoder, addr):
-        encoder.unsigned_byte(self.reg_mask)
+        reg_mask = self.reg_mask
+
+        if self.is_popm:
+            reversed_mask = 0
+            for i in range(0, 8):
+                if reg_mask & (1 << i) != 0:
+                    reversed_mask |= 1 << (7 - i)
+
+            reg_mask = reversed_mask
+
+        encoder.unsigned_byte(reg_mask)
         return opcode
 
     def render(self, addr):
