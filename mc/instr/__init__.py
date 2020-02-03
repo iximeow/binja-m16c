@@ -625,7 +625,7 @@ class OperMultiReg(Operand):
         return opcode
 
     def render(self, addr):
-        register_list = ['FB', 'SB', 'A1', 'A0', 'R3', 'R2', 'R1', 'R0']
+        register_list = ['R0', 'R1', 'R2', 'R3', 'A0', 'A1', 'SB', 'FB']
         if self.reversed:
             register_list = reversed(register_list)
         tokens = []
